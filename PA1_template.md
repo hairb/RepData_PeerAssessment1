@@ -148,8 +148,8 @@ median_i
 ## [1] 10766.19
 ```
 
-The mean of total steps taken each day (after filling NA values) is 1.0766189\times 10^{4}.  
-The median of total steps taken each day (after filling NA values) is 1.0766189\times 10^{4}. 
+The mean of total steps taken each day (after filling NA values) is 10766.19.  
+The median of total steps taken each day (after filling NA values) is 10766.19. 
 
 The mean has not changed. 
 The median has changed, and is now equal to the mean.

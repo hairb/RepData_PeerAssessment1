@@ -87,8 +87,8 @@ median_i <- median(data_per_day_imputed$total_steps)
 median_i
 ```
 
-The mean of total steps taken each day (after filling NA values) is `r mean_i`.  
-The median of total steps taken each day (after filling NA values) is `r median_i`. 
+The mean of total steps taken each day (after filling NA values) is `r format(mean_i,digits=7)`.  
+The median of total steps taken each day (after filling NA values) is `r format(median_i,digits=7)`. 
 
 The mean has not changed. 
 The median has changed, and is now equal to the mean.
