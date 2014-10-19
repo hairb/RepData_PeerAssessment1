@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Loading and preprocessing the data</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<h2>Loading and preprocessing the data</h2>
+
+<p>File is unzipped.<br>
+The data is read using read.csv<br>
+The sqldf library is used to manipulate the data (throughout the code).  </p>
+
+<pre><code class="r">library(sqldf)
+library(lattice)
+unzip(&quot;activity.zip&quot;)
+data &lt;- read.csv(&quot;activity.csv&quot;)
+data_per_day &lt;- sqldf(&quot;select date,sum(steps) total_steps 
+                      from data 
+                      where steps is not null 
+                      group by date&quot;)
+</code></pre>
+
+<h2>What is mean total number of steps taken per day?</h2>
+
+<pre><code class="r">hist(data_per_day$total_steps,xlab=&quot;Total number of steps&quot;,main=&quot;Total number of steps taken each day&quot;, col=&quot;blue&quot;)
+</code></pre>
+
+<p><img src="figure/part_2_mean-1.png" alt="plot of chunk part_2_mean"> </p>
+
+<pre><code class="r">mean_val &lt;- mean(data_per_day$total_steps)
+mean_val
+</code></pre>
+
+<pre><code>## [1] 10766.19
+</code></pre>
+
+<pre><code class="r">median_val &lt;- median(data_per_day$total_steps)
+median_val
+</code></pre>
+
+<pre><code>## [1] 10765
+</code></pre>
+
+<p>The mean of total steps taken each day is 10766.19.<br>
+The median of total steps taken each day is 10765. </p>
+
+<h2>What is the average daily activity pattern?</h2>
+
+<ol>
+<li>Calculating for each interval - the average of steps taken, accross all days.</li>
+<li>Plotting a time series of the intervals (x) and the avg of steps taken (y).</li>
+<li>Finding the interval with the maximum average number of steps. </li>
+</ol>
+
+<pre><code class="r">avg_steps_per_interval &lt;- sqldf(&quot;select interval, avg(steps) avg_steps 
+                                from data  
+                                group by interval&quot;)
+plot(avg_steps_per_interval$interval, avg_steps_per_interval$avg_steps, type=&quot;l&quot;,
+     xlab=&quot;Interval&quot;,ylab=&quot;avg steps&quot;,main=&quot;Avg steps taken per interval&quot;)
+</code></pre>
+
+<p><img src="figure/part_3_avg_daily-1.png" alt="plot of chunk part_3_avg_daily"> </p>
+
+<pre><code class="r">max_val &lt;- sqldf(&quot;select interval, avg_steps from avg_steps_per_interval where avg_steps = (select max(avg_steps) from avg_steps_per_interval)&quot;)
+
+max_val
+</code></pre>
+
+<pre><code>##   interval avg_steps
+## 1      835  206.1698
+</code></pre>
+
+<p>The 5 minute interval with the maximum average steps taken is interval # 835. The average steps taken in this interval is 206.17.    </p>
+
+<h2>Imputing missing values</h2>
+
+<pre><code class="r">null_cnt &lt;- sqldf(&quot;select count(*) from data where steps is null&quot;)
+null_cnt
+</code></pre>
+
+<pre><code>##   count(*)
+## 1     2304
+</code></pre>
+
+<p>The number of 5-mintue intervals with NA values is 2304  </p>
+
+<p>The strategy for filling all NA values is the avg of steps for that 5-minute interval across all days.<br>
+If a NA (null) value is detected, the avg_steps value of the same interval is used (from the calculations done in the previous section - part 3)</p>
+
+<pre><code class="r">data_imputed &lt;- sqldf(&quot;select 
+                    case when steps is null then avg_steps else steps end i_steps , 
+                    date, data.interval, avg_steps 
+                  from data , avg_steps_per_interval 
+                  where data.interval = avg_steps_per_interval.interval&quot;)
+
+
+data_per_day_imputed &lt;- 
+  sqldf(&quot;select date,sum(i_steps) total_steps 
+        from data_imputed 
+        group by date&quot;)
+
+hist(data_per_day_imputed$total_steps,xlab=&quot;Total number of steps&quot;,main=&quot;Total number of steps taken each day (data imputed)&quot;, col=&quot;red&quot;)
+</code></pre>
+
+<p><img src="figure/part_4_imputing-1.png" alt="plot of chunk part_4_imputing"> </p>
+
+<pre><code class="r">mean_i &lt;- mean(data_per_day_imputed$total_steps)
+mean_i
+</code></pre>
+
+<pre><code>## [1] 10766.19
+</code></pre>
+
+<pre><code class="r">median_i &lt;- median(data_per_day_imputed$total_steps)
+median_i
+</code></pre>
+
+<pre><code>## [1] 10766.19
+</code></pre>
+
+<p>The mean of total steps taken each day (after filling NA values) is 1.0766189 &times; 10<sup>4</sup>.<br>
+The median of total steps taken each day (after filling NA values) is 1.0766189 &times; 10<sup>4</sup>. </p>
+
+<p>The mean has not changed. 
+The median has changed, and is now equal to the mean.</p>
+
+<h2>Are there differences in activity patterns between weekdays and weekends?</h2>
+
+<p>Calculating the average steps for each interval - seperated to weekday and weekend intervals.<br>
+Then, Plotting the time series of weekday days and weekend days.</p>
+
+<pre><code class="r">data_imputed$date_type &lt;- sapply(weekdays(as.Date(data_imputed$date)),switch,
+                                 Monday=&#39;weekday&#39;,
+                                 Tuesday=&#39;weekday&#39;,
+                                 Wednesday=&#39;weekday&#39;,
+                                 Thursday=&#39;weekday&#39;,
+                                 Friday=&#39;weekday&#39;,
+                                 Saturday=&#39;weekend&#39;,
+                                 Sunday=&#39;weekend&#39;)
+data_imputed_avg &lt;- sqldf(&quot;select interval, date_type, avg(i_steps) avg_steps
+                          from data_imputed 
+                          group by interval, date_type&quot;)
+par(mfrow=c(2,1))
+
+xyplot(data_imputed_avg$avg_steps~data_imputed_avg$interval | data_imputed_avg$date_type, type=&quot;l&quot;,layout=c(1,2),xlab=&quot;Interval&quot;,ylab=&quot;Number Of Steps&quot;)
+</code></pre>
+
+<p><img src="figure/part_5_weekdays-1.png" alt="plot of chunk part_5_weekdays"> </p>
+
+</body>
+
+</html>
